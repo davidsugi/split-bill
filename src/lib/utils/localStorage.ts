@@ -1,16 +1,12 @@
-type LocalStorage = {
-    save(key: string, value: string): void;
-    load(key: string): string | null;
+
+
+const localStorage = {
+    save: function (key: string, value: string): void {
+        window.localStorage.setItem(key, value);
+    },
+    load: function(key: string): string | null {
+        return window.localStorage.getItem(key);
+    }
 }
 
-export function localStorage(): LocalStorage {
-    return {
-        save(key: string, value: string): void {
-            window.localStorage.setItem(key, value);
-        },
-        load(key: string): string | null {
-            return window.localStorage.getItem(key);
-        }
-    }
-    
-}
+export default localStorage;

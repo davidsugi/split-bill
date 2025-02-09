@@ -5,21 +5,23 @@
     import Select from 'svelte-select';
     import { onMount } from 'svelte';
     import { roundCurrency } from '../lib/utils/currencyUtils.js';
+    import localStorage  from '../lib/utils/localStorage.js';
+    import { LOCAL_STORAGE_KEYS, type formSelectType, type Row } from '../lib/types/index.js';
 
-    type formSelectType = {
-        value: string;
-        label: string;
-    }
-
+    const { load, save } = localStorage;
     let textValue: string = '';
     let members: string[] = []; 
     let debtInfo: { [key: string]: { totalDebt: number, owes: { [key: string]: number }, shouldCollect: { [key: string]: number } } } = {};
+    const headers: string[] = ['Who', 'Paid', 'What', 'For', "Price"];
+    const defaultRow = { Who: undefined, Paid: 0, What: '', For: [], Price: 0 };
+    let rows: Row[] = [{ ...defaultRow }];
 
     onMount(() => {
-        const savedTextValue = localStorage.getItem('textValue');
+        const savedTextValue = load(LOCAL_STORAGE_KEYS.memberList);
         if (savedTextValue) {
             textValue = savedTextValue;
             processInput();
+            loadState();
         }
     });
 
@@ -27,23 +29,29 @@
       console.log('Input value:', textValue);
       members = textValue.split(',').map(member => member.trim());
       console.log('Members:', members);
-      localStorage.setItem('textValue', textValue);
+      save(LOCAL_STORAGE_KEYS.memberList, textValue);
       // Add your processing logic here
     }
 
-    let headers: string[] = ['Who', 'Paid', 'What', 'For'];
-    type Row = {
-        [key: string]: undefined | formSelectType | string | number | formSelectType[];
-        Who: formSelectType | undefined;
-        Paid: number;
-        What: string;
-        For: formSelectType[];
-    };
-
-    let rows: Row[] = [{ Who: undefined, Paid: 0, What: '', For: [] }];
+    function clearInput(): void {
+        textValue = '';
+        members = [];
+        save(LOCAL_STORAGE_KEYS.memberList, '');
+    }
 
     function addRow(): void {
-        rows = [...rows, { Who: undefined, Paid: 0, What: '', For: [] }];
+        saveRowState();
+        rows = [...rows, { ...defaultRow }];
+    }
+
+    function saveRowState(): void {
+        save(LOCAL_STORAGE_KEYS.rows, JSON.stringify(rows));
+    }
+    function loadState(): void {
+        const savedRows = load(LOCAL_STORAGE_KEYS.rows);
+        if (savedRows) {
+            rows = JSON.parse(savedRows);
+        }
     }
 
     function handleMultiSelectChange(event: CustomEvent<formSelectType[]>, rowIndex: number): void {
@@ -54,23 +62,35 @@
         } else {
             rows[rowIndex].For = selectedOptions;
         }
+
+        rows[rowIndex].Price = roundCurrency(rows[rowIndex].Paid/rows[rowIndex].For.length);
+        saveRowState();
     }
 
-    function handleMultiSelectRemove(event: CustomEvent<formSelectType[]|formSelectType>, rowIndex: number): void {
+    function handleSelectRemove(event: CustomEvent<formSelectType[]|formSelectType>, rowIndex: number): void {
         const selectedOptions = event.detail;
         if(Array.isArray(selectedOptions)) {
             rows[rowIndex].For = [];
             return
         }
         rows[rowIndex].For = rows[rowIndex].For.filter((forOption) => forOption.value !== selectedOptions.value);
+        rows[rowIndex].Price = roundCurrency(rows[rowIndex].Paid/rows[rowIndex].For.length);
+        saveRowState();
     }
 
     function handleSelectWhoChange(event: CustomEvent<formSelectType>, rowIndex: number): void {
         const selectedOptions = event.detail;
+        if(rows[rowIndex].Who?.value === selectedOptions.value){
+            rows[rowIndex].Who = undefined;
+            saveRowState();
+            return;
+        }
         rows[rowIndex].Who = selectedOptions;
+        saveRowState();
     }
 
     function calculateDebt(): void {
+        saveRowState();
         debtInfo = {};
         members.forEach(member => {
             debtInfo[member] = {
@@ -81,6 +101,9 @@
         });
 
         rows.forEach(row => {
+            if(row.Who === undefined || row.Paid === 0 || row.For.length === 0) {
+                return;
+            }
             const lender = row.Who?.value || "none";
             const amount = row.Paid;
             const borrowers = row.For;
@@ -90,7 +113,7 @@
                 if (borrower.value !== lender) {
                     debtInfo[borrower.value].totalDebt += splitAmount;
                     debtInfo[borrower.value].owes[lender] = (debtInfo[borrower.value].owes[lender] || 0) + splitAmount;
-                    debtInfo[lender].shouldCollect[borrower.value] = (debtInfo[lender].shouldCollect[borrower.value] || 0) + splitAmount - debtInfo[borrower.value].owes[lender];
+                    debtInfo[lender].shouldCollect[borrower.value] = (debtInfo[lender].shouldCollect[borrower.value] || 0) + splitAmount;
                 }
             });
         });
@@ -101,9 +124,13 @@
 <main class="container mx-auto p-4">
   <h1 class="text-3xl font-bold text-blue-600">Bayar Dewe Dewe</h1>
   <p class="mt-4 text-gray-700">Easy split bill apps with 100% data privacy, all data stored in user's device.</p>
+
   <br />
   <TextArea placeholder="Type all the member separated with comma..." bind:value={textValue} />
   <Button label="Add All Member" onClick={processInput} />
+  {#if members.length > 0}
+    <Button label="Clear All Member" onClick={clearInput} />
+  {/if}
   
   {#if members.length > 0}
     <p class="mt-4 text-gray-500">
@@ -134,6 +161,7 @@
                     items={members.map(member => ({ value: member, label: member }))}
                     value={rows[i].Who}
                     on:change={(event: CustomEvent<formSelectType>) => handleSelectWhoChange(event, i)}
+                    on:clear={(event: CustomEvent<formSelectType>) => handleSelectWhoChange(event, i)}
                     />
                   {:else if header === "For"}
                       <Select
@@ -142,12 +170,16 @@
                         value={rows[i].For}
                         multiple={true}
                         on:change={(event: CustomEvent<formSelectType[]>) => handleMultiSelectChange(event, i)}
-                        on:clear={(event: CustomEvent<formSelectType[]>) => handleMultiSelectRemove(event, i)}
+                        on:clear={(event: CustomEvent<formSelectType[]>) => handleSelectRemove(event, i)}
                       />
                   {:else if header === "Paid"}
                       <div class="flex items-center">
                         <span class="mr-2">Rp.</span>
                         <input class="w-full p-1" type="number" bind:value={row[header]} placeholder={header} />
+                      </div>
+                    {:else if header === "Price"}
+                      <div class="flex items-center">
+                        <span class="w-full p-1">{row[header]}</span>
                       </div>
                     {:else}
                       <input class="w-full p-1" bind:value={row[header]} placeholder={header} />
