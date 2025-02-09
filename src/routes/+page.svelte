@@ -1,9 +1,11 @@
 <script lang="ts">
     import '../app.css';
-    import TextArea from '../components/TextArea.svelte';
-    import Button from '../components/Button.svelte';
+    import TextArea from '../lib/components/TextArea.svelte';
+    import Button from '../lib/components/Button.svelte';
     import Select from 'svelte-select';
-    
+    import { onMount } from 'svelte';
+    import { roundCurrency } from '../lib/utils/currencyUtils.js';
+
     type formSelectType = {
         value: string;
         label: string;
@@ -13,10 +15,19 @@
     let members: string[] = []; 
     let debtInfo: { [key: string]: { totalDebt: number, owes: { [key: string]: number }, shouldCollect: { [key: string]: number } } } = {};
 
+    onMount(() => {
+        const savedTextValue = localStorage.getItem('textValue');
+        if (savedTextValue) {
+            textValue = savedTextValue;
+            processInput();
+        }
+    });
+
     function processInput(): void {
       console.log('Input value:', textValue);
       members = textValue.split(',').map(member => member.trim());
       console.log('Members:', members);
+      localStorage.setItem('textValue', textValue);
       // Add your processing logic here
     }
 
@@ -35,11 +46,7 @@
         rows = [...rows, { Who: undefined, Paid: 0, What: '', For: [] }];
     }
 
-    function getTableData(): void {
-        console.log(rows); // This will log the table data as an array of objects
-    }
-
-    function handleSelectChange(event: CustomEvent<formSelectType[]>, rowIndex: number): void {
+    function handleMultiSelectChange(event: CustomEvent<formSelectType[]>, rowIndex: number): void {
         const selectedOptions = event.detail;
         const haveAll = selectedOptions.some((forOption) => forOption.value === 'ALL');
         if (haveAll) {
@@ -47,6 +54,15 @@
         } else {
             rows[rowIndex].For = selectedOptions;
         }
+    }
+
+    function handleMultiSelectRemove(event: CustomEvent<formSelectType[]|formSelectType>, rowIndex: number): void {
+        const selectedOptions = event.detail;
+        if(Array.isArray(selectedOptions)) {
+            rows[rowIndex].For = [];
+            return
+        }
+        rows[rowIndex].For = rows[rowIndex].For.filter((forOption) => forOption.value !== selectedOptions.value);
     }
 
     function handleSelectWhoChange(event: CustomEvent<formSelectType>, rowIndex: number): void {
@@ -68,17 +84,16 @@
             const lender = row.Who?.value || "none";
             const amount = row.Paid;
             const borrowers = row.For;
-            const splitAmount = amount / borrowers.length;
-
+            const splitAmount = roundCurrency(amount / borrowers.length);
+            
             borrowers.forEach(borrower => {
                 if (borrower.value !== lender) {
                     debtInfo[borrower.value].totalDebt += splitAmount;
                     debtInfo[borrower.value].owes[lender] = (debtInfo[borrower.value].owes[lender] || 0) + splitAmount;
-                    debtInfo[lender].shouldCollect[borrower.value] = (debtInfo[lender].shouldCollect[borrower.value] || 0) + splitAmount;
+                    debtInfo[lender].shouldCollect[borrower.value] = (debtInfo[lender].shouldCollect[borrower.value] || 0) + splitAmount - debtInfo[borrower.value].owes[lender];
                 }
             });
         });
-
         console.log(debtInfo);
     }
 </script>
@@ -126,7 +141,8 @@
                         items={[{ value: 'ALL', label: 'ALL' }, ...members.map(member => ({ value: member, label: member }))]}
                         value={rows[i].For}
                         multiple={true}
-                        on:change={(event: CustomEvent<formSelectType[]>) => handleSelectChange(event, i)}
+                        on:change={(event: CustomEvent<formSelectType[]>) => handleMultiSelectChange(event, i)}
+                        on:clear={(event: CustomEvent<formSelectType[]>) => handleMultiSelectRemove(event, i)}
                       />
                   {:else if header === "Paid"}
                       <div class="flex items-center">
