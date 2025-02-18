@@ -1,6 +1,7 @@
 export const LOCAL_STORAGE_KEYS = {
     memberList: "MEMBER_LIST",
     rows: "DEBT_RECORDS",
+    debtInfo: "DEBT_INFO",
 }
 
 export type formSelectType = {
