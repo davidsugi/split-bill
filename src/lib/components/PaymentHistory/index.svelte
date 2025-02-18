@@ -121,13 +121,7 @@
                     });
                   });
                 });
-        saveDebtInfoState()
-        calculateDebtSummary()
-        console.log(debtInfo);
-    }
 
-
-    function calculateDebtSummary(): void {
         debtInfo.update(d => {
             Object.keys(d).forEach(member => {
                 const owes = d[member].owes;
@@ -153,6 +147,9 @@
             });
             return d;
         });
+
+        saveDebtInfoState();
+        console.log(debtInfo);
     }
 </script>
   
