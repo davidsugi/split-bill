@@ -8,7 +8,7 @@
   import { onMount } from 'svelte';
   import { clickOutside } from '$lib/utils/clickOutside.js';
 
-  export let handleSelectWhoChange, handleMultiSelectChange, handleSelectRemove;
+  export let handleSelectWhoChange, handleMultiSelectChange, handleSelectRemove, deleteRow;
   export let editMode: Writable<boolean[]>;
 
   function toggleEditMode(index: number) {
@@ -40,6 +40,9 @@
         {:else}
           <IconifyIcon class="grey-icon"icon="fa6-regular:pen-to-square" />
         {/if}
+      </button>
+      <button class="absolute top-10 right-3" on:click={() => deleteRow(i)}>
+        <IconifyIcon class="red-icon" icon="fa6-regular:trash-can" />
       </button>
       {#if $editMode[i]}
         <!-- Edit Mode -->

@@ -7,6 +7,7 @@
     import { roundCurrency } from '$lib/utils/currencyUtils.js';
     import localStorage from '$lib/utils/localStorage.js';
     import { writable } from 'svelte/store';
+    import IconifyIcon from "@iconify/svelte";
 
     const { save } = localStorage;
     const defaultRow = { Who: undefined, Paid: 0, What: '', For: [], Price: 0 };
@@ -67,18 +68,31 @@
         });
         saveRowState();
     }
+
+    function deleteRow(rowIndex: number): void {
+        rows.update(r => {
+            const newRows = r.filter((_, index) => index !== rowIndex);
+            editMode.set(newRows.map(() => false));
+            return newRows;
+        });
+        saveRowState();
+    }
 </script>
   
-<main class="container mx-auto p-4">
+<main class="container mx-auto p-2 lg:p-4 ">
   <h2 class="font-bold text-2xl text-gray-700">Transaction List</h2>
   <div class="hidden sm:block">
-    <WebTableLayout {handleSelectWhoChange} {handleMultiSelectChange} {handleSelectRemove} />
-    <Button label="Add New Expenses" onClick={addRow} />
-</div>
-
-<div class="block sm:hidden">
-    <MobileCardLayout {editMode} {handleSelectWhoChange} {handleMultiSelectChange} {handleSelectRemove} />
+    <WebTableLayout {handleSelectWhoChange} {handleMultiSelectChange} {handleSelectRemove} {deleteRow} />
     <Button label="Add New Expenses" onClick={addRow} />
   </div>
-  
+
+  <div class="block sm:hidden">
+    <MobileCardLayout {editMode} {handleSelectWhoChange} {handleMultiSelectChange} {handleSelectRemove} {deleteRow} />
+    <button 
+      class="fixed bottom-4 right-4 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg"
+      on:click={addRow}
+    >
+      <IconifyIcon icon="mdi:plus" class="w-6 h-6" />
+    </button>
+  </div>
 </main>

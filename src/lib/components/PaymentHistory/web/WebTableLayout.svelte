@@ -2,14 +2,15 @@
   import { rows, members } from '$lib/stores.js';
   import Select from 'svelte-select';
   import type { formSelectType } from '$lib/types/index.js';
+  import IconifyIcon from "@iconify/svelte";
 
-  export let handleSelectWhoChange, handleMultiSelectChange, handleSelectRemove;
+  export let handleSelectWhoChange, handleMultiSelectChange, handleSelectRemove, deleteRow;
 </script>
 
 <table class="mt-4 border-collapse border border-gray-300 w-full">
   <thead>
     <tr>
-      {#each ['Who', 'Paid', 'What', 'For', 'Price'] as header}
+      {#each ['Who', 'Paid', 'What', 'For', 'Price', 'Actions'] as header}
         <th class="border border-gray-300 p-2">{header}</th>
       {/each}
     </tr>
@@ -50,6 +51,11 @@
               {/if}
           </td>
         {/each}
+        <td class="border border-gray-300 p-2">
+          <button on:click={() => deleteRow(i)}>
+            <IconifyIcon class="grey-icon" icon="fa6-regular:trash-can" />
+          </button>
+        </td>
       </tr>
     {/each}
   </tbody>
