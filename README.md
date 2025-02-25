@@ -1,58 +1,74 @@
-# create-svelte
+# Svelte Split Bills App
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+This is a Svelte application for managing and splitting bills among multiple members. The app allows you to add, edit, and delete transactions, and it calculates the amount each member needs to pay.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+## Live Demo
 
-## Creating a project
+You can view the live demo of the app [here](https://bayar-dewe-dewe.vercel.app/).
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features
 
-```bash
-# create a new project in the current directory
-npx sv create
+- Add new expenses
+- Edit existing expenses
+- Delete expenses
+- Split bills among members
+- Responsive design for mobile and web
 
-# create a new project in my-app
-npx sv create my-app
-```
+## Getting Started
 
-## Developing
+### Prerequisites
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Make sure you have [Node.js](https://nodejs.org/) installed.
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/svelte-split-bills-app.git
+   cd svelte-split-bills-app
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Running the App
+
+To start the development server:
 
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+This will start the server and open the app in a new browser tab.
 
-## Building
+### Building the App
 
-To build your library:
-
-```bash
-npm run package
-```
-
-To create a production version of your showcase app:
+To create a production build:
 
 ```bash
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+You can preview the production build with:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```bash
+npm run preview
+```
 
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
+### Publishing
 
 To publish your library to [npm](https://www.npmjs.com):
 
-```bash
-npm publish
-```
+1. Go into the `package.json` and give your package the desired name through the `"name"` option.
+2. Add a `"license"` field and point it to a `LICENSE` file.
+3. Run the following command to publish:
+
+   ```bash
+   npm publish
+   ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

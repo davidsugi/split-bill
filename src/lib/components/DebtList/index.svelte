@@ -2,6 +2,7 @@
     import MemberChips from '$lib/components/common/MemberChips.svelte';
     import { debtInfo } from '$lib/stores.js';
     import { LOCAL_STORAGE_KEYS } from '$lib/types/index.js';
+  import { formatCurrency } from '$lib/utils/currencyUtils.js';
     import localStorage from '$lib/utils/localStorage.js';
     import { onMount } from 'svelte';
 
@@ -30,17 +31,17 @@
       {#each Object.keys($debtInfo) as member}
         <div class="mt-4">
           <h3 class="text-xl font-semibold"><MemberChips text={member} /></h3>
-          <p>Total Debt: Rp. {$debtInfo[member].totalDebt}</p>
+          <p>Total Debt: Rp. {formatCurrency($debtInfo[member].totalDebt)}</p>
           <h4 class="font-semibold">Owes:</h4>
           <ul class="list-disc list-inside">
             {#each Object.keys($debtInfo[member].owes) as lender}
-              <li>{lender}: Rp. {$debtInfo[member].owes[lender]}</li>
+              <li>{lender}: Rp. {formatCurrency($debtInfo[member].owes[lender])}</li>
             {/each}
           </ul>
           <h4 class="font-semibold">Should Collect:</h4>
           <ul class="list-disc list-inside">
             {#each Object.keys($debtInfo[member].shouldCollect) as borrower}
-              <li>{borrower}: Rp. {$debtInfo[member].shouldCollect[borrower]}</li>
+              <li>{borrower}: Rp. {formatCurrency($debtInfo[member].shouldCollect[borrower])}</li>
             {/each}
           </ul>
         </div>

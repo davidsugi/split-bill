@@ -3,8 +3,9 @@
   import Select from 'svelte-select';
   import type { formSelectType } from '$lib/types/index.js';
   import IconifyIcon from "@iconify/svelte";
+  import { formatCurrency } from '$lib/utils/currencyUtils.js';
 
-  export let handleSelectWhoChange, handleMultiSelectChange, handleSelectRemove, deleteRow;
+  export let totalAmount, handleSelectWhoChange, handleMultiSelectChange, handleSelectRemove, deleteRow;
 </script>
 
 <table class="mt-4 border-collapse border border-gray-300 w-full">
@@ -44,7 +45,7 @@
                   </div>
                 {:else if header === "Price"}
                   <div class="flex items-center">
-                    <span class="w-full p-1">{row[header]}</span>
+                    <span class="w-full p-1">{formatCurrency(row[header])}</span>
                   </div>
                 {:else}
                   <input class="w-full p-1" bind:value={row[header]} placeholder={header} />
@@ -58,5 +59,6 @@
         </td>
       </tr>
     {/each}
+    <tr><td colspan="4" class="border border-gray-300 p-2 right-align">Total:</td><td class="border border-gray-300 p-2">{totalAmount}</td></tr>
   </tbody>
 </table>

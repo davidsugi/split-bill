@@ -7,6 +7,7 @@
   import type { Writable } from 'svelte/store';
   import { onMount } from 'svelte';
   import { clickOutside } from '$lib/utils/clickOutside.js';
+  import { formatCurrency } from '$lib/utils/currencyUtils.js';
 
   export let handleSelectWhoChange, handleMultiSelectChange, handleSelectRemove, deleteRow;
   export let editMode: Writable<boolean[]>;
@@ -41,7 +42,7 @@
           <IconifyIcon class="grey-icon"icon="fa6-regular:pen-to-square" />
         {/if}
       </button>
-      <button class="absolute top-10 right-3" on:click={() => deleteRow(i)}>
+      <button class="absolute top-2 right-10" on:click={() => deleteRow(i)}>
         <IconifyIcon class="red-icon" icon="fa6-regular:trash-can" />
       </button>
       {#if $editMode[i]}
@@ -82,7 +83,8 @@
         <div class="mb-2">
           <label class="block text-gray-700"  for="price-{i}">Price</label>
           <div class="flex items-center">
-            <span class="w-full p-1">{row.Price}</span>
+            <span class="mr-2">Rp.</span>
+            <span class="w-full p-1">{formatCurrency(row.Price)}</span>
           </div>
         </div>
       {:else}
@@ -95,7 +97,7 @@
           <label class="block text-gray-700" for="display-paid-{i}">Paid</label>
           <div class="flex items-center">
             <span class="mr-2">Rp.</span>
-            <span>{row.Paid}</span>
+            <span>{formatCurrency(row.Paid)}</span>
           </div>
         </div>
         <div class="mb-2">
@@ -109,7 +111,8 @@
         <div class="mb-2">
           <label class="block text-gray-700" for="display-price-{i}">Price</label>
           <div class="flex items-center">
-            <span class="w-full p-1">{row.Price}</span>
+            <span class="mr-2">Rp.</span>
+            <span class="w-full p-1">{formatCurrency(row.Price)}</span>
           </div>
         </div>
       {/if}

@@ -6,12 +6,17 @@
     import { LOCAL_STORAGE_KEYS, type formSelectType } from '$lib/types/index.js';
     import { roundCurrency } from '$lib/utils/currencyUtils.js';
     import localStorage from '$lib/utils/localStorage.js';
-    import { writable } from 'svelte/store';
+    import { writable, derived } from 'svelte/store';
     import IconifyIcon from "@iconify/svelte";
+    import { formatCurrency } from '$lib/utils/currencyUtils.js';
 
     const { save } = localStorage;
     const defaultRow = { Who: undefined, Paid: 0, What: '', For: [], Price: 0 };
     const editMode = writable($rows.map(() => false));
+
+    const totalAmount = derived(rows, $rows => {
+        return $rows.reduce((total, row) => total + row.Paid, 0);
+    });
 
     function addRow(): void {
         saveRowState();
@@ -82,7 +87,7 @@
 <main class="container mx-auto p-2 lg:p-4 ">
   <h2 class="font-bold text-2xl text-gray-700">Transaction List</h2>
   <div class="hidden sm:block">
-    <WebTableLayout {handleSelectWhoChange} {handleMultiSelectChange} {handleSelectRemove} {deleteRow} />
+    <WebTableLayout totalAmount={$totalAmount}  {handleSelectWhoChange} {handleMultiSelectChange} {handleSelectRemove} {deleteRow} />
     <Button label="Add New Expenses" onClick={addRow} />
   </div>
 
@@ -94,5 +99,10 @@
     >
       <IconifyIcon icon="mdi:plus" class="w-6 h-6" />
     </button>
+    <div class="mt-4">
+        <h3 class="font-bold text-xl text-gray-700">Total: Rp. {formatCurrency($totalAmount)}</h3>
+    </div>
   </div>
+
+  
 </main>

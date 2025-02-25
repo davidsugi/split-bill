@@ -1,4 +1,3 @@
-
 export function customsRound(value: number, divider: number): number {
     const subdivider = (divider / 10);
     const firstDigits = Math.round(value % divider / subdivider);
@@ -16,4 +15,13 @@ export function roundCurrency(value: number): number {
         digitsToRound = digitsToRound / 10;
     }
     return result;
+}
+
+/**
+ * Formats a number to a currency string with comma separators.
+ * @param amount - The amount to format.
+ * @returns The formatted currency string.
+ */
+export function formatCurrency(amount: number): string {
+    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
