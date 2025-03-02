@@ -4,7 +4,8 @@
     import PaymentHistory from '$lib/components/PaymentHistory/index.svelte';
     import { members } from '$lib/stores.js';
     import '../app.css';
-    import { Alert } from 'flowbite-svelte';
+    import Tesseract from '$lib/components/Tesseract/index.svelte'
+    import Media from '$lib/components/Media/index.svelte'
 </script>
 <div class="bg-blue-600 lg:bg-white sticky shadow">
   <h1 class="container mx-auto p-4 text-3xl font-bold text-white lg:text-blue-600">Bayar Dewe Dewe</h1>
@@ -14,7 +15,8 @@
 
   <br />
   <MemberList />
-  
+  <Media />
+  <Tesseract />
   {#if $members.length > 0}  
     <PaymentHistory />
     <DebtList />
